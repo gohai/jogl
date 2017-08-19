@@ -28,6 +28,7 @@
 
 package jogamp.opengl.egl;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,6 +97,15 @@ public abstract class EGLDynamicLibraryBundleInfo extends GLDynamicLibraryBundle
 
     protected final List<String> getEGLLibNamesList() {
         final List<String> eglLibNames = new ArrayList<String>();
+
+        // quirk for legacy Broadcom graphics in Raspbian release August '17
+        final File vclibnewlocation = new File(
+            "/opt/vc/lib/libbrcmEGL.so");
+        final File vc4modlocation = new File(
+            "/sys/module/vc4");
+        if (vclibnewlocation.isFile() && !vc4modlocation.isDirectory()) {
+            eglLibNames.add("libbrcmEGL.so");
+        }
 
         // this is the default EGL lib name, according to the spec
         eglLibNames.add("libEGL.so.1");

@@ -45,17 +45,25 @@ public final class EGLES2DynamicLibraryBundleInfo extends EGLDynamicLibraryBundl
     @Override
     public final List<List<String>> getToolLibNames() {
 
-        // Prefer libGLESv2.so over libGLESv2.so.2 for Broadcom graphics
-        // when the VC4 DRM driver isn't present
+        // Prefer libGLESv2.so over libGLESv2.so.2 for legacy Broadcom graphics
         final File vcliblocation = new File(
-            "/opt/vc/lib/libbcm_host.so");
+            "/opt/vc/lib/libGLESv2.so");
         final File vc4modlocation = new File(
             "/sys/module/vc4");
         final boolean bcm_vc_iv_quirk = vcliblocation.isFile() && !vc4modlocation.isDirectory();
 
+        // libGLESv2.so was renamed to libbrcmGLESv2.so in Raspbian release August '17
+        final File vclibnewlocation = new File(
+            "/opt/vc/lib/libbrcmGLESv2.so");
+        final boolean bcm_vc_iv_quirk2 = vclibnewlocation.isFile() && !vc4modlocation.isDirectory();
+
         final List<List<String>> libsList = new ArrayList<List<String>>();
         {
             final List<String> libsGL = new ArrayList<String>();
+
+            if (bcm_vc_iv_quirk2) {
+                libsGL.add("libbrcmGLESv2.so");
+            }
 
             // ES3: This is the default lib name, according to the spec
             libsGL.add("libGLESv3.so.3");
